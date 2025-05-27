@@ -4,9 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "findZeroScores": "ts-node src/findZeroScores.ts"
+    "findZeroScores": "ts-node src/findZeroScores.ts",
+    "scoreAddresses": "ts-node src/scoreAddresses.ts"
   },
   "dependencies": {
+    "axios": "^1.6.0",
     "csv-writer": "^1.6.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.10.0",

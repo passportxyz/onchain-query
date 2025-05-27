@@ -10,9 +10,9 @@ dotenv.config();
 const INPUT_FILE = "inputs/addresses.csv";
 const OUTPUT_FILE = "outputs/zero-scores.csv";
 
-const { RPC_URL, CONTRACT_ADDRESS, COMMUNITY_ID } = process.env;
+const { RPC_URL, RESOLVER_CONTRACT_ADDRESS, COMMUNITY_ID } = process.env;
 
-if (!RPC_URL || !CONTRACT_ADDRESS || !COMMUNITY_ID) {
+if (!RPC_URL || !RESOLVER_CONTRACT_ADDRESS || !COMMUNITY_ID) {
   throw new Error("Missing required environment variables. Check your .env file.");
 }
 
@@ -106,7 +106,7 @@ const writeCsv = async (addresses: string[], outputFile: string) => {
 
 const main = async () => {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
-  const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
+  const contract = new ethers.Contract(RESOLVER_CONTRACT_ADDRESS, ABI, provider);
   const addresses = await getAddresses(INPUT_FILE);
   const zeroScoreAddresses = await getZeroScoreAddresses(addresses, contract, Number(COMMUNITY_ID));
   await writeCsv(zeroScoreAddresses, OUTPUT_FILE);
