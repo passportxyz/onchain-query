@@ -1,0 +1,6 @@
+.env
+node_modules
+inputs
+outputs
+input.csv
+output.csv
