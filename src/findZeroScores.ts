@@ -7,15 +7,13 @@ const createObjectCsvWriter: any = require("csv-writer").createObjectCsvWriter;
 
 dotenv.config();
 
-const INPUT_FILE = "input.csv";
-const OUTPUT_FILE = "output.csv";
+const INPUT_FILE = "inputs/addresses.csv";
+const OUTPUT_FILE = "outputs/zero-scores.csv";
 
 const { RPC_URL, CONTRACT_ADDRESS, COMMUNITY_ID } = process.env;
 
 if (!RPC_URL || !CONTRACT_ADDRESS || !COMMUNITY_ID) {
-  throw new Error(
-    "Missing required environment variables. Check your .env file."
-  );
+  throw new Error("Missing required environment variables. Check your .env file.");
 }
 
 const ABI = [
@@ -78,10 +76,7 @@ const getZeroScoreAddresses = async (
           if (communityId === 335) {
             ({ score, expirationTime } = await contract.scores(address));
           } else {
-            ({ score, expirationTime } = await contract.communityScores(
-              communityId,
-              address
-            ));
+            ({ score, expirationTime } = await contract.communityScores(communityId, address));
           }
           if (Number(expirationTime) > now && Number(score) === 0) {
             return address;
@@ -92,14 +87,10 @@ const getZeroScoreAddresses = async (
         return null;
       })
     );
-    zeroScoreAddresses.push(
-      ...results.filter((addr): addr is string => !!addr)
-    );
+    zeroScoreAddresses.push(...results.filter((addr): addr is string => !!addr));
     processed += batch.length;
     if (processed % 100 === 0 || processed >= addresses.length) {
-      console.log(
-        `Processed ${processed} addresses... (${zeroScoreAddresses.length} zero score addresses found)`
-      );
+      console.log(`Processed ${processed} addresses... (${zeroScoreAddresses.length} zero score addresses found)`);
     }
   }
   return zeroScoreAddresses;
@@ -117,11 +108,7 @@ const main = async () => {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, provider);
   const addresses = await getAddresses(INPUT_FILE);
-  const zeroScoreAddresses = await getZeroScoreAddresses(
-    addresses,
-    contract,
-    Number(COMMUNITY_ID)
-  );
+  const zeroScoreAddresses = await getZeroScoreAddresses(addresses, contract, Number(COMMUNITY_ID));
   await writeCsv(zeroScoreAddresses, OUTPUT_FILE);
   console.log(
     `Found ${zeroScoreAddresses.length} addresses with score 0 and unexpired. Output written to ${OUTPUT_FILE}`
