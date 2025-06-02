@@ -42,8 +42,12 @@ const queryBatch = async (client: pg.Client, ids: number[]): Promise<any[]> => {
 };
 
 const formatAsCsv = (rows: any[]): string => {
-  const header = 'id,created_at';
-  const dataRows = rows.map(row => `${row.id},${row.created_at}`);
+  const header = 'created_at,id';
+  const dataRows = rows.map(row => {
+    // Convert to ISO format for consistent sorting
+    const isoDate = new Date(row.created_at).toISOString();
+    return `${isoDate},${row.id}`;
+  });
   return [header, ...dataRows].join('\n');
 };
 
@@ -80,7 +84,12 @@ async function main() {
   console.log(`Found ${uniqueIds.length} unique IDs to query`);
 
   // Connect to PostgreSQL
-  const client = new pg.Client(connectionString);
+  const client = new pg.Client({
+    connectionString,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
   await client.connect();
 
   try {
