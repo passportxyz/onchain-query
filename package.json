@@ -6,7 +6,8 @@
   "scripts": {
     "findZeroScores": "ts-node src/findZeroScores.ts",
     "scoreAddresses": "ts-node src/scoreAddresses.ts",
-    "queryDupes": "ts-node src/queryDupes.ts"
+    "queryDupes": "ts-node src/queryDupes.ts",
+    "getNullifiers": "ts-node src/getNullifiers.ts"
   },
   "dependencies": {
     "@types/pg": "^8.15.4",
