@@ -1,25 +1,31 @@
-import { parse } from 'csv-parse/sync';
-import { readFileSync, writeFileSync } from 'fs';
+import { parse } from 'csv-parse';
+import { createReadStream, writeFileSync } from 'fs';
 import pg from 'pg';
 
 const BATCH_SIZE = 10000; // Larger batch size to reduce DB queries
 
-const readAndParseCsv = (filePath: string): any[] => {
-  const csvContent = readFileSync(filePath, 'utf-8');
-  return parse(csvContent, {
-    columns: true,
-    skip_empty_lines: true
-  });
-};
-
-const extractUniqueIds = (records: any[]): number[] => {
-  const idSet = records.reduce((acc, record) => {
-    if (record.id_a) acc.add(parseInt(record.id_a));
-    if (record.id_b) acc.add(parseInt(record.id_b));
-    return acc;
-  }, new Set<number>());
+const extractUniqueIdsFromCsv = async (filePath: string): Promise<number[]> => {
+  const idSet = new Set<number>();
   
-  return Array.from(idSet);
+  return new Promise((resolve, reject) => {
+    const parser = parse({
+      columns: true,
+      skip_empty_lines: true
+    });
+    
+    parser.on('readable', function() {
+      let record;
+      while ((record = parser.read()) !== null) {
+        if (record.id_a) idSet.add(parseInt(record.id_a));
+        if (record.id_b) idSet.add(parseInt(record.id_b));
+      }
+    });
+    
+    parser.on('error', reject);
+    parser.on('end', () => resolve(Array.from(idSet)));
+    
+    createReadStream(filePath).pipe(parser);
+  });
 };
 
 const createBatches = <T>(items: T[], batchSize: number): T[][] => {
@@ -79,8 +85,7 @@ async function main() {
   }
 
   // Extract unique IDs from CSV
-  const records = readAndParseCsv('./dupes.csv');
-  const uniqueIds = extractUniqueIds(records);
+  const uniqueIds = await extractUniqueIdsFromCsv('./dupes.csv');
   console.log(`Found ${uniqueIds.length} unique IDs to query`);
 
   // Connect to PostgreSQL
