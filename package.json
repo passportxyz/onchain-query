@@ -5,13 +5,17 @@
   "license": "MIT",
   "scripts": {
     "findZeroScores": "ts-node src/findZeroScores.ts",
-    "scoreAddresses": "ts-node src/scoreAddresses.ts"
+    "scoreAddresses": "ts-node src/scoreAddresses.ts",
+    "queryDupes": "ts-node src/queryDupes.ts"
   },
   "dependencies": {
+    "@types/pg": "^8.15.4",
     "axios": "^1.6.0",
+    "csv-parse": "^5.6.0",
     "csv-writer": "^1.6.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.10.0",
+    "pg": "^8.16.0",
     "prettier": "^3.5.3"
   },
   "devDependencies": {
